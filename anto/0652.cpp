@@ -1,0 +1,98 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+struct nod{int nr; nod* adr;};
+int v[101];
+nod *nou(int a){
+    nod * aux=new nod;
+    aux->nr=a;
+    aux->adr=NULL;
+    return aux;
+}
+void adaug(int a, int b, nod * l[]){
+    nod *p;
+    p=nou(a);
+    p->adr=l[b];
+    l[b]=p;
+}
+void reprezentare(char s[],int &n, nod *l[]){
+    ifstream f(s);
+    f>>n;
+    int x,y;
+    while(f>>x>>y)
+        adaug(x,y,l),adaug(y,x,l);
+    f.close();
+}
+void init(nod *l[]){
+    int i;
+    for(i=1;i<=100;i++)
+        l[i]=0;
+}
+//verificare
+void lista (int a,nod* l[]){
+    nod *p=l[a];
+    cout<<a<<':';
+    while(p){
+        cout<<p->nr<<" ";
+        p=p->adr;
+    }
+    cout<<endl;
+}
+int exista(int a, nod * p){
+    while(p){
+        if(p->nr==a)
+            return 1;
+        p=p->adr;
+    }
+    return 0;
+}
+int partial(int n1,nod *l1[], int n2, nod *l2[]){
+    if(n1!=n2) return 0;
+    int i;
+    nod *p;
+    for(i=1;i<=n2;i++){
+        p=l2[i];
+        while(p)
+            if(!exista(p->nr,l1[i])) return 0;
+            else p=p->adr;
+    }
+    return 1;
+}
+void marcare(int a, nod *l[]){
+    nod *p;
+    p=l[a];
+    while(p)
+        v[p->nr]++, p=p->adr;
+}
+int complementar(int n1, nod *l1[],int n2, nod*l2[]){
+    int i,j;
+    for(i=1;i<=n1;i++){
+        //restartez vectorul caracteristic
+        for(j=1;j<=100;j++)
+            v[j]=0;
+        marcare(i,l1);
+        marcare(i,l2);
+        v[i]=1;
+        for(j=1;j<=n1;j++)
+            if(v[j]!=1)
+                return 0;
+    }
+    return 1;
+}
+int main()
+{
+    int n1,n2;
+    nod* l1[101],*l2[101];
+    init(l1);
+    init(l2);
+    reprezentare("GNO1.txt",n1,l1);
+    reprezentare("GNO2.txt",n2,l2);
+    if(partial(n1,l1,n2,l2))
+        cout<<"da";
+    else cout<<"nu";
+    cout<<endl;
+    if(complementar(n1,l1,n2,l2))
+        cout<<"da";
+    else cout<<"nu";
+    return 0;
+}
